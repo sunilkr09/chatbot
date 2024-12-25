@@ -4,28 +4,21 @@ from openai import OpenAI
 # Title and Description
 st.title("🍛 Indian Cuisine Chatbot")
 st.write(
-    "Welcome to the Indian Cuisine Chatbot! This chatbot helps you explore an Indian menu, take orders, and answer questions. "
-    "Provide your OpenAI API key below to start interacting."
+    "Welcome to the Indian Cuisine Chatbot! This chatbot helps you explore an Indian menu, take orders, and answer questions."
 )
 
-# Ask user for OpenAI API key
-openai_api_key = st.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
-else:
-    # Create OpenAI client
-    try:
-        client = OpenAI(api_key=openai_api_key)
-        st.success("API key successfully loaded.")
-    except Exception as e:
-        st.error(f"Error initializing OpenAI client: {e}")
-    
+# Create OpenAI client
+try:
+    client = OpenAI(api_key=st.secrets.OPEN_API_KEY)
+except Exception as e:
+    st.error(f"Error initializing OpenAI client: {e}")
+
     # Initialize session state for chat messages
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {
-                "role": "system",
-                "content": """
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {
+            "role": "system",
+            "content": """
 You are an experienced Indian cuisine specialist,You will suggest menu, educate the customers and provide automated service to collect orders for an Indian restaurant.\ . \
 You first greet the customer, then start chatting with the customer.\
 and the take the order, \
@@ -69,49 +62,50 @@ Mysore Pak,Rich gram flour and ghee sweet,4.49\
 Rajma,Red kidney beans cooked in a spiced gravy,9.99\
 Lassi,Traditional Indian yogurt drink, plain or sweet,2.99\
 """
-            }
-        ]
+        }
+    ]
 
-    # Function to handle chat interaction
-    def get_completion_from_messages(messages, model="gpt-4o", temperature=1):
-        try:
-            response = client.chat.completions.create(
-                model=model, messages=messages, temperature=temperature
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            st.error(f"Error fetching response: {e}")
-            return "Sorry, something went wrong."
-
-    # Request a dynamic welcome message from OpenAI
-    prompt = "Generate a dynamic and engaging welcome message for a chatbot about Indian cuisine. Mention that users can explore the menu, place orders, and ask questions. And don't forget to add Namaste🙏."
-    
-    # Generate the welcome message using OpenAI
-    response = client.chat.completions.create(
-        model="gpt-4o",  # Use the appropriate model
-        messages=[{"role": "system", "content": prompt}],
-        temperature=1
-    )
-    
-    # Extract the generated message
-    welcome_message = response.choices[0].message.content
-    
-    # Display the generated welcome message
-    st.write(welcome_message)
-
-    # User input field
-    if prompt := st.chat_input("Ask me about Indian cuisine or place an order!"):
-        # Append user message
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        # Get AI response
-        response = get_completion_from_messages(
-            st.session_state.messages, model="gpt-4o", temperature=1
+# Function to handle chat interaction
+def get_completion_from_messages(messages, model="gpt-4o", temperature=1):
+    try:
+        response = client.chat.completions.create(
+            model=model, messages=messages, temperature=temperature
         )
+        return response.choices[0].message.content
+    except Exception as e:
+        st.error(f"Error fetching response: {e}")
+        return "Sorry, something went wrong."
 
-        # Append and display AI response
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        with st.chat_message("assistant"):
-            st.markdown(response)
+# Request a dynamic welcome message from OpenAI
+prompt = "Generate a dynamic and engaging welcome message for a chatbot about Indian cuisine. Mention that users can explore the menu, place orders, and ask questions. And don't forget to add Namaste🙏."
+
+# Generate the welcome message using OpenAI
+response = client.chat.completions.create(
+    model="gpt-4o",  # Use the appropriate model
+    messages=[{"role": "system", "content": prompt}],
+    temperature=1
+)
+
+# Extract the generated message
+welcome_message = response.choices[0].message.content
+
+# Display the generated welcome message
+st.write(welcome_message)
+
+# User input field
+if prompt := st.chat_input("Ask me about Indian cuisine or place an order!"):
+    # Append user message
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Get AI response
+    response = get_completion_from_messages(
+        st.session_state.messages, model="gpt-4o", temperature=1
+    )
+
+    # Append and display AI response
+    st.session_state.messages.append(
+        {"role": "assistant", "content": response})
+    with st.chat_message("assistant"):
+        st.markdown(response)
