@@ -68,12 +68,12 @@ Keema Naan,Leavened bread stuffed with spiced minced meat,4.99\
 Mysore Pak,Rich gram flour and ghee sweet,4.49\
 Rajma,Red kidney beans cooked in a spiced gravy,9.99\
 Lassi,Traditional Indian yogurt drink, plain or sweet,2.99\
-""",
+"""
             }
         ]
 
     # Function to handle chat interaction
-    def get_completion_from_messages(messages, model="gpt-4", temperature=1):
+    def get_completion_from_messages(messages, model="gpt-4o", temperature=1):
         try:
             response = client.chat.completions.create(
                 model=model, messages=messages, temperature=temperature
@@ -82,6 +82,22 @@ Lassi,Traditional Indian yogurt drink, plain or sweet,2.99\
         except Exception as e:
             st.error(f"Error fetching response: {e}")
             return "Sorry, something went wrong."
+
+    # Request a dynamic welcome message from OpenAI
+    prompt = "Generate a dynamic and engaging welcome message for a chatbot about Indian cuisine. Mention that users can explore the menu, place orders, and ask questions. And don't forget to add Namaste🙏."
+    
+    # Generate the welcome message using OpenAI
+    response = client.chat.completions.create(
+        model="gpt-4o",  # Use the appropriate model
+        messages=[{"role": "system", "content": prompt}],
+        temperature=1
+    )
+    
+    # Extract the generated message
+    welcome_message = response.choices[0].message.content
+    
+    # Display the generated welcome message
+    st.write(welcome_message)
 
     # User input field
     if prompt := st.chat_input("Ask me about Indian cuisine or place an order!"):
@@ -92,7 +108,7 @@ Lassi,Traditional Indian yogurt drink, plain or sweet,2.99\
 
         # Get AI response
         response = get_completion_from_messages(
-            st.session_state.messages, model="gpt-4", temperature=1
+            st.session_state.messages, model="gpt-4o", temperature=1
         )
 
         # Append and display AI response
