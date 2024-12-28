@@ -27,8 +27,9 @@ def connect_google_sheet(document_id):
 
 document = connect_google_sheet(DOCUMENT_ID)
 worksheet = document.worksheet("Menu")
-cells = worksheet.get_all_cells
-st.error(cells)
+records = worksheet.get_all_records()
+for record in records:
+    st.error(record)
 
 # Title and Description
 st.title("🍛 Indian Cuisine Chatbot")
