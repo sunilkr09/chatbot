@@ -1,5 +1,34 @@
+import os.path
+
 import streamlit as st
 from openai import OpenAI
+
+import gspread
+from google.oauth2.service_account import Credentials
+
+# Google Sheets API scopes
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+DOCUMENT_ID = "1mEYGtIpS7uHGcQeJgp2tpaDAYlLakeBLFfRLFrr3YqE"
+
+# Path to your service account JSON file
+CREDENTIALS_FILE = os.path.abspath(".streamlit/token.json")
+creds = None
+
+if not os.path.exists(CREDENTIALS_FILE):
+    st.error(f"Missing Google API Credential file!")
+
+# Connect to Google Sheets
+def connect_google_sheet(document_id):
+    # Authenticate using service account
+    creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
+    client = gspread.authorize(creds)
+    workbook = client.open_by_key(document_id)
+    return workbook
+
+document = connect_google_sheet(DOCUMENT_ID)
+worksheet = document.worksheet("Menu")
+cells = worksheet.get_all_cells
+st.error(cells)
 
 # Title and Description
 st.title("🍛 Indian Cuisine Chatbot")
